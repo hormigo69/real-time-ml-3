@@ -13,7 +13,7 @@ def main(
     """
     It does 2 things:
     1. Reads trades from the Kraken API and
-    2. Pushes them to a Kafka topic.
+    2. Pushes them to a Kafka topic..
 
     Args:
         kafka_broker_address: str,
