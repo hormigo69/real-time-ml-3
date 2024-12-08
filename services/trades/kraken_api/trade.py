@@ -6,47 +6,39 @@ from pydantic import BaseModel
 class Trade(BaseModel):
     """
     A trade from the Kraken API.
-        "symbol": "MATIC/USD",
-        "side": "sell",
-        "price": 0.5117,
-        "qty": 40.0,
-        "ord_type": "market",
-        "trade_id": 4665906,
-        "timestamp": "2023-09-25T07:49:37.708706Z"
     """
 
     pair: str
     price: float
     volume: float
-    timestamp: datetime
+    timestamp: str
     timestamp_ms: int
 
-    '''@field_validator('timestamp_ms', mode='after')
-    def set_timestamp_ms(cls, v, values):
-        """
-        Automatically set the timestamp_ms based on the timestamp field
-        """
-        timestamp = values.get('timestamp')
-        if timestamp:
-            return int(timestamp.timestamp() * 1000)
-        return v'''
+    @classmethod
+    def from_kraken_api_response(
+        cls,
+        pair: str,
+        price: float,
+        volume: float,
+        timestamp: str,
+    ) -> 'Trade':
+        return cls(
+            pair=pair,
+            price=price,
+            volume=volume,
+            timestamp=timestamp,
+            timestamp_ms=cls._datestr2milliseconds(timestamp),
+        )
 
-    # @property
-    # def timestamp_ms(self) -> int:
-    #     """
-    #     Convert the timestamp to milliseconds
-    #     """
-    #     return int(self.timestamp.timestamp() * 1000)
+    @staticmethod
+    def _datestr2milliseconds(datestr: str) -> int:
+        return int(
+            datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S.%fZ').timestamp() * 1000
+        )
 
-    def to_dict(self) -> dict:
+    def to_str(self) -> str:
         # pydantic method to convert the model to a dict
         return self.model_dump_json()
 
-    # if you prefer not to serialize all the fields, you can do this:
-    # return {
-    #     "pair": self.pair,
-    #     "price": self.price,
-    #     "volume": self.volume,
-    #     "timestamp_ms": self.timestamp_ms,
-    #     "timestamp": self.timestamp_ms,
-    # }
+    def to_dict(self) -> dict:
+        return self.model_dump()
