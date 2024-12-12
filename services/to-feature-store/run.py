@@ -9,6 +9,7 @@ def main(
     kafka_consumer_group: str,
     feature_group_name: str,
     feature_group_version: int,
+    candle_seconds: int,
 ):
     """
     2 things:
@@ -32,6 +33,8 @@ def main(
     sdf = app.dataframe(input_topic)
 
     # Do some processing here
+    # We need to extract the features we want to push to the feature store
+    # TODO: Implement this
 
     # Sink data to a CSV file
     sdf.sink(csv_sink)
@@ -48,4 +51,5 @@ if __name__ == '__main__':
         kafka_consumer_group=config.kafka_consumer_group,
         feature_group_name=config.feature_group_name,
         feature_group_version=config.feature_group_version,
+        candle_seconds=config.candle_seconds,
     )

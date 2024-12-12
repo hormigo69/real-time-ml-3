@@ -117,6 +117,10 @@ def main(
     sdf['window_start_ms'] = sdf['start']
     sdf['window_end_ms'] = sdf['end']
 
+    # Agregar candle_seconds antes de la selección de columnas
+    sdf['candle_seconds'] = candle_seconds
+    logger.info(f'Candle Seconds agregado: {candle_seconds}')
+
     # Keep only the relevant columns
     sdf = sdf[
         [
@@ -129,12 +133,10 @@ def main(
             'volume',
             'window_start_ms',
             'window_end_ms',
+            'candle_seconds',
         ]
     ]
 
-    sdf['candle_seconds'] = candle_seconds
-
-    # sdf = sdf. print()
     sdf = sdf.update(lambda value: logger.info(f'Candle: {value}'))
     # sdf = sdf.update(lambda value: breakpoint())
 

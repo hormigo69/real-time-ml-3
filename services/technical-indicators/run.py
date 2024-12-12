@@ -10,6 +10,7 @@ def main(
     kafka_output_topic: str,
     kafka_consumer_group: str,
     max_candles_in_state: int,
+    candle_seconds: int,
 ):
     """
     steps:
@@ -22,6 +23,7 @@ def main(
         kafka_output_topic: The topic to send technical indicators to
         kafka_consumer_group: The consumer group for the kafka consumer
         max_candles_in_state: The number of candles to use for technical indicators
+        candle_seconds: The number of seconds per candle
     Returns:
         None
     """
@@ -42,8 +44,12 @@ def main(
         value_serializer='json',
     )
 
-    # Create a streaming dataframe so we can start transforming the data in real-time
+    # Create a Streaming DataFrame so we can start transforming data in real time
     sdf = app.dataframe(topic=input_topic)
+
+    # We only keep the candles with the same window size as the candle_seconds
+    # Thanks Carlo!
+    sdf = sdf[sdf['candle_seconds'] == candle_seconds]
 
     # Update the list of candles in the state
     # Apply a custom function and inform StreamingDataFrame
@@ -70,4 +76,5 @@ if __name__ == '__main__':
         kafka_output_topic=config.kafka_output_topic,
         kafka_consumer_group=config.kafka_consumer_group,
         max_candles_in_state=config.max_candles_in_state,
+        candle_seconds=config.candle_seconds,
     )
