@@ -54,6 +54,7 @@ def main(
     kafka_output_topic: str,
     kafka_consumer_group: str,
     candle_seconds: int,
+    max_candles_in_state: int,
 ):
     """
     3 steps:
@@ -132,6 +133,8 @@ def main(
         ]
     ]
 
+    sdf['candle_seconds'] = candle_seconds
+
     # sdf = sdf. print()
     sdf = sdf.update(lambda value: logger.info(f'Candle: {value}'))
     # sdf = sdf.update(lambda value: breakpoint())
@@ -151,5 +154,6 @@ if __name__ == '__main__':
         kafka_input_topic=config.kafka_input_topic,
         kafka_output_topic=config.kafka_output_topic,
         kafka_consumer_group=config.kafka_consumer_group,
+        max_candles_in_state=config.max_candles_in_state,
         candle_seconds=config.candle_seconds,
     )
