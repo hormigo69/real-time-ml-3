@@ -34,6 +34,9 @@ def main(
         consumer_group=kafka_consumer_group,
     )
 
+    # Limpiar el estado antes de comenzar
+    app.clear_state()
+
     # Define the input and output topics of our streaming application
     input_topic = app.topic(
         name=kafka_input_topic,
@@ -64,7 +67,14 @@ def main(
     # Send the final message to the output topic
     sdf = sdf.to_topic(output_topic)
 
-    app.run()
+    try:
+        app.run()
+    except KeyboardInterrupt:
+        logger.info('Deteniendo el servicio de manera controlada...')
+        app.stop()
+    except Exception as e:
+        logger.error(f'Error inesperado: {e}')
+        raise
 
 
 if __name__ == '__main__':
