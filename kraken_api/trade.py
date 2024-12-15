@@ -32,11 +32,8 @@ class Trade(BaseModel):
             timestamp_sec: float
         """
 
-
-
         # convert the timestamp_sec from float to str
         timestamp_ms = int(float(timestamp_sec) * 1000)
-         
 
         return cls(
             pair=pair,
@@ -64,7 +61,9 @@ class Trade(BaseModel):
 
     @staticmethod
     def _milliseconds2datestr(milliseconds: int) -> str:
-        return datetime.fromtimestamp(milliseconds / 1000).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        return datetime.fromtimestamp(milliseconds / 1000).strftime(
+            '%Y-%m-%dT%H:%M:%S.%fZ'
+        )
 
     @staticmethod
     def _datestr2milliseconds(datestr: str) -> int:

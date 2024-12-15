@@ -1,10 +1,7 @@
-from typing import Union
-
+from kraken_api.base import TradesAPI
 from kraken_api.mock import KrakenMockAPI
 from kraken_api.rest import KrakenRestAPI
 from kraken_api.websocket import KrakenWebsocketAPI
-from kraken_api.base import TradesAPI
-
 from loguru import logger
 from quixstreams import Application
 
@@ -25,7 +22,7 @@ def main(
         trades_api: TradesAPI, with 2 methods: get_trades() and is_done()
     ):
 
-    Returns: 
+    Returns:
         None
     """
     logger.info('Starting the trades service')
@@ -42,15 +39,12 @@ def main(
     # topic = app.topic(name=kafka_topic, value_type='json')
 
     with app.get_producer() as producer:
-        
         while not trades_api.is_done():
-
             trades = trades_api.get_trades()
 
             for trade in trades:
                 # Serialize the trade as bytes
                 message = topic.serialize(key=trade.pair, value=trade.to_dict())
-
                 # Push the serialized message  to the topic
                 producer.produce(topic=topic.name, value=message.value, key=message.key)
 
@@ -69,7 +63,6 @@ if __name__ == '__main__':
         # # TODO : remove this after testing the kraken_api.rest.KarkenRestAPISinglePair
         # from kraken_api.rest import KarkenRestAPISinglePair
         # kraken_api = KarkenRestAPISinglePair(pair=config.pairs[0], last_n_days=config.last_n_days)
-
 
     elif config.data_source == 'test':
         kraken_api = KrakenMockAPI(pairs=config.pairs)

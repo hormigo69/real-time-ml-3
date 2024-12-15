@@ -4,8 +4,8 @@ from typing import List
 from loguru import logger
 from websocket import create_connection
 
-from .trade import Trade
 from .base import TradesAPI
+from .trade import Trade
 
 
 class KrakenWebsocketAPI(TradesAPI):
@@ -53,7 +53,7 @@ class KrakenWebsocketAPI(TradesAPI):
                 price=trade['price'],
                 volume=trade['qty'],
                 timestamp=trade['timestamp'],
-                #timestamp_ms=self.datestr2milliseconds(trade['timestamp']),
+                # timestamp_ms=self.datestr2milliseconds(trade['timestamp']),
             )
             for trade in trades_data
         ]

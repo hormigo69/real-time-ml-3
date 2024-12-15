@@ -1,12 +1,12 @@
+import json
+import time
 from typing import List
 
 import requests
-import time
+from loguru import logger
+
 from .base import TradesAPI
 from .trade import Trade
-
-import json
-from loguru import logger
 
 
 class KrakenRestAPI(TradesAPI):
@@ -15,9 +15,9 @@ class KrakenRestAPI(TradesAPI):
         self.last_n_days = last_n_days
 
         self.apis = [
-            KarkenRestAPISinglePair(pair=pair, last_n_days=last_n_days) 
+            KrakenRestAPISinglePair(pair=pair, last_n_days=last_n_days)
             for pair in self.pairs
-            ]
+        ]
 
     def get_trades(self) -> List[Trade]:
         """
@@ -35,8 +35,6 @@ class KrakenRestAPI(TradesAPI):
 
         return trades
 
-
-
     def is_done(self) -> bool:
         """
         We are done when all the apis are done
@@ -46,9 +44,9 @@ class KrakenRestAPI(TradesAPI):
                 return False
         return True
 
-class KarkenRestAPISinglePair(TradesAPI):
 
-    URL = 'https://api.kraken.com/0/public/Trades' 
+class KrakenRestAPISinglePair(TradesAPI):
+    URL = 'https://api.kraken.com/0/public/Trades'
 
     # def get_trades(self) -> List[Trade]:
     #     pass
@@ -61,7 +59,6 @@ class KarkenRestAPISinglePair(TradesAPI):
         pair: str,
         last_n_days: int,
     ):
-        
         self.pair = pair
         self.last_n_days = last_n_days
         self._is_done = False
@@ -72,62 +69,62 @@ class KarkenRestAPISinglePair(TradesAPI):
         )
 
         logger.info(
-            f"Getting trades for pair {self.pair} for the last {self.since_timestamp_ns * 1000000000} seconds"
+            f'Getting trades for pair {self.pair} for the last {self.since_timestamp_ns * 1000000000} seconds'
         )
-
 
     def get_trades(self) -> List[Trade]:
         """
         Send a request to the Kraken API to get the trades for the pair and last n days.
         """
 
-        payload = {}
         headers = {'Accept': 'application/json'}
         params = {
             'pair': self.pair,
             'since': self.since_timestamp_ns,
         }
 
-        response = requests.request("GET", self.URL, headers=headers, params=params)
-        
+        response = requests.request('GET', self.URL, headers=headers, params=params)
+
         # TODO: revisar si esto lo puedo quitar. Añadimos un retraso de 2 segundos entre peticiones
-        time.sleep(0.5)  
+        time.sleep(0.5)
 
         # parse the response as json
         try:
-            data = json.loads(response.text)            
+            data = json.loads(response.text)
         except json.JSONDecodeError as e:
-            logger.error(f"Error decodificando JSON: {e}")
+            logger.error(f'Error decodificando JSON: {e}')
             return []
 
         # get the trades for the self.pair
         try:
             trades = data['result'][self.pair]
-        except KeyError as e:
-            logger.error(f"Error obteniendo trades. Código de estado: {response.status_code}")
+        except KeyError:
+            logger.error(
+                f'Error obteniendo trades. Código de estado: {response.status_code}'
+            )
             return []
 
-        #convert the trades to Trade objects
-        trades = [Trade.from_kraken_rest_api_response(
-            pair=self.pair,
+        # convert the trades to Trade objects
+        trades = [
+            Trade.from_kraken_rest_api_response(
+                pair=self.pair,
                 price=trade[0],
                 volume=trade[1],
                 timestamp_sec=trade[2],
-            ) for trade in trades
+            )
+            for trade in trades
         ]
 
         # update the since_timestamp_ns
         self.since_timestamp_ns = int(float(data['result']['last']))
 
-
         # Check if we are done
-        #TODO: check if these stopping conditions are correct
+        # TODO: check if these stopping conditions are correct
         if self.since_timestamp_ns > int(time.time_ns() - 1000000000):
             self._is_done = True
         if self.since_timestamp_ns == 0:
             self._is_done = True
-        
-        
+
         return trades
 
     def is_done(self) -> bool:

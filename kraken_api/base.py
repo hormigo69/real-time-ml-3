@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from .trade import Trade
-
 
 class TradesAPI(ABC):
     @abstractmethod
@@ -11,4 +9,3 @@ class TradesAPI(ABC):
     @abstractmethod
     def is_done(self) -> bool:
         pass
-
