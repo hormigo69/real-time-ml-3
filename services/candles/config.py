@@ -9,6 +9,7 @@ class Config(BaseSettings):
     kafka_consumer_group: str
     candle_seconds: int
     max_candles_in_state: int
+    emit_incomplete_candles: bool
 
 
 config = Config()
