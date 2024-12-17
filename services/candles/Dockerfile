@@ -1,22 +1,5 @@
 # Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
-
-# Instalar dependencias de compilación y librdkafka
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Instalar librdkafka desde el código fuente
-RUN curl -L https://github.com/edenhill/librdkafka/archive/refs/tags/v2.4.0.tar.gz | tar xzf - \
-    && cd librdkafka-2.4.0 \
-    && ./configure \
-    && make \
-    && make install \
-    && cd .. \
-    && rm -rf librdkafka-2.4.0 \
-    && ldconfig
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
 # Install the project into `/app`
 WORKDIR /app

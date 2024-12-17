@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +16,8 @@ class Settings(BaseSettings):
     feature_group_event_time: str
 
     candle_seconds: int
+
+    data_source: Literal['live', 'historical', 'test']
 
 
 class HopsworksCredentials(BaseSettings):

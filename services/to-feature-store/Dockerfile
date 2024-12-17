@@ -1,30 +1,24 @@
 # Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
-# Instalar dependencias de compilación y librdkafka
+# Instalar build dependencies y pandas del sistema
 RUN apt-get update && apt-get install -y \
+    gcc \
     build-essential \
-    curl \
-    git \
+    wget \
+    python3-dev \
+    python3-numpy \
+    python3-pandas \
+    libc-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Instalar librdkafka desde el código fuente
-RUN curl -L https://github.com/edenhill/librdkafka/archive/refs/tags/v2.4.0.tar.gz | tar xzf - \
-    && cd librdkafka-2.4.0 \
-    && ./configure \
-    && make \
-    && make install \
-    && cd .. \
-    && rm -rf librdkafka-2.4.0 \
-    && ldconfig
-
+    
 # Install the project into `/app`
 WORKDIR /app
 
-# Enable bytecode compilation
+# Forzar el uso de Python 3.10
+ENV PYTHON=/usr/local/bin/python3.10
+ENV UV_PYTHON=/usr/local/bin/python3.10
 ENV UV_COMPILE_BYTECODE=1
-
-# Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
 # Install the project's dependencies using the lockfile and settings
@@ -34,7 +28,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --no-dev
 
 # Then, add the rest of the project source code and install it
-# Installing separately from its dependencies allows optimal layer caching
 ADD . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
