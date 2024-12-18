@@ -62,7 +62,7 @@ if __name__ == '__main__':
         feature_group_version=config.feature_group_version,
         feature_group_primary_keys=config.feature_group_primary_keys,
         feature_group_event_time=config.feature_group_event_time,
-        candle_seconds=config.candle_seconds,
+        feature_group_candle_seconds=config.feature_group_candle_seconds,
     )
 
     main(

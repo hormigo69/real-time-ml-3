@@ -2,14 +2,10 @@ run-dev:
 	uv run python run.py
 
 build:
-	docker build --progress=plain -f Dockerfile -t to-feature-store .
+	docker build -f Dockerfile -t to-feature-store .
 
 run: build
 	docker run -it \
-	--network redpanda_network \
-	--env-file live.settings.env \
-	-e KAFKA_BROKER_ADDRESS=redpanda:9092 \
-	-e PYTHONUNBUFFERED=1 \
-	--memory=4g \
-	to-feature-store
-	
+		--network redpanda_network \
+		-e KAFKA_BROKER_ADDRESS=redpanda:9092 \
+		to-feature-store

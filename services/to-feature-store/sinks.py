@@ -16,14 +16,14 @@ class HopsworksFeatureStoreSink(BatchingSink):
         feature_group_version: int,
         feature_group_primary_keys: list[str],
         feature_group_event_time: str,
-        candle_seconds: int,
+        feature_group_candle_seconds: int,
     ):
         """
         Stablish connection to the Hopsworks Feature Store
         """
         self.feature_group_name = feature_group_name
         self.feature_group_version = feature_group_version
-        self.candle_seconds = candle_seconds
+        self.candle_seconds = feature_group_candle_seconds
         # Establish connection to the Hopsworks Feature Store
         project = hopsworks.login(project=project_name, api_key_value=api_key)
         self._fs = project.get_feature_store()
