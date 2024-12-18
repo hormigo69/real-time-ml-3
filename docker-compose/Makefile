@@ -36,3 +36,12 @@ backfill-technical-indicators: build-technical-indicators-historical
 	@echo "Starting backfill with RUN_ID: $(RUN_ID)"
 	cd .. && RUN_ID=$(RUN_ID) docker compose -f docker-compose/technical-indicators-historical.yml up -d
 
+# Technical indicators base pipeline management
+build-technical-indicators-pipeline:
+	docker compose -f technical-indicators-pipeline.yml build
+
+start-technical-indicators-pipeline: build-technical-indicators-pipeline
+	docker compose -f technical-indicators-pipeline.yml up -d
+
+stop-technical-indicators-pipeline:
+	docker compose -f technical-indicators-pipeline.yml down
