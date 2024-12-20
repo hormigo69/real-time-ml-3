@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+kraken_api/base.py
+kraken_api/mock.py
+kraken_api/rest.py
+kraken_api/trade.py
+kraken_api/websocket.py
+trades.egg-info/PKG-INFO
+trades.egg-info/SOURCES.txt
+trades.egg-info/dependency_links.txt
+trades.egg-info/requires.txt
+trades.egg-info/top_level.txt

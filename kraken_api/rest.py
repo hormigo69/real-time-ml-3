@@ -48,12 +48,6 @@ class KrakenRestAPI(TradesAPI):
 class KrakenRestAPISinglePair(TradesAPI):
     URL = 'https://api.kraken.com/0/public/Trades'
 
-    # def get_trades(self) -> List[Trade]:
-    #     pass
-
-    # def is_done(self) -> bool:
-    #     return False
-
     def __init__(
         self,
         pair: str,
@@ -86,13 +80,13 @@ class KrakenRestAPISinglePair(TradesAPI):
         response = requests.request('GET', self.URL, headers=headers, params=params)
 
         # TODO: revisar si esto lo puedo quitar. Añadimos un retraso de 2 segundos entre peticiones
-        time.sleep(0.5)
+        #time.sleep(0.5)
 
         # parse the response as json
         try:
             data = json.loads(response.text)
         except json.JSONDecodeError as e:
-            logger.error(f'Error decodificando JSON: {e}')
+            logger.error(f'Error decoding JSON: {e}')
             return []
 
         # get the trades for the self.pair
@@ -100,7 +94,7 @@ class KrakenRestAPISinglePair(TradesAPI):
             trades = data['result'][self.pair]
         except KeyError:
             logger.error(
-                f'Error obteniendo trades. Código de estado: {response.status_code}'
+                f'Error getting trades. Status code: {response.status_code}'
             )
             return []
 

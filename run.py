@@ -59,11 +59,9 @@ if __name__ == '__main__':
         kraken_api = KrakenWebsocketAPI(pairs=config.pairs)
     elif config.data_source == 'historical':
         kraken_api = KrakenRestAPI(pairs=config.pairs, last_n_days=config.last_n_days)
-
         # # TODO : remove this after testing the kraken_api.rest.KarkenRestAPISinglePair
         # from kraken_api.rest import KarkenRestAPISinglePair
         # kraken_api = KarkenRestAPISinglePair(pair=config.pairs[0], last_n_days=config.last_n_days)
-
     elif config.data_source == 'test':
         kraken_api = KrakenMockAPI(pairs=config.pairs)
     else:
