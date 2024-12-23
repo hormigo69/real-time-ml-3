@@ -39,8 +39,8 @@ def main(
         auto_offset_reset='latest' if data_source == 'live' else 'earliest',
     )
 
-    # Limpiar el estado antes de comenzar
-    app.clear_state()
+    # # Limpiar el estado antes de comenzar
+    # app.clear_state()
 
     # Define the input and output topics of our streaming application
     input_topic = app.topic(
