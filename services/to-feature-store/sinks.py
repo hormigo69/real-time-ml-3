@@ -39,11 +39,11 @@ class HopsworksFeatureStoreSink(BatchingSink):
             online_enabled=True,
         )
 
-        # Set the materialization interval
-        self._feature_group.materialization_job_schedule(
-            cron_expression=f"0 0/{self.materialization_interval_minutes} * ? * * *",
-            start_time=datetime.now(tz=datetime.timezone.utc),
-        )
+        # # Set the materialization interval
+        # self._feature_group.materialization_job_schedule(
+        #     cron_expression=f"0 0/{self.materialization_interval_minutes} * ? * * *",
+        #     start_time=datetime.now(tz=datetime.timezone.utc),
+        # )
 
         # Call constructor of the parent class to make sure the batches are initialized
         super().__init__()
