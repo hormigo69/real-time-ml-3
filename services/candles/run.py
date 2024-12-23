@@ -159,6 +159,15 @@ def main(
     # push the candles to the output topic
     sdf = sdf.to_topic(topic=output_topic)
 
+    # Clear the state of the application
+    try:
+        app.clear_state()
+        logger.info("Estado previo limpiado correctamente")
+    except FileNotFoundError:
+        logger.info("No hay estado previo que limpiar")
+    except Exception as e:
+        logger.warning(f"Error al limpiar el estado: {e}")
+
     # Start the application
     app.run()
 

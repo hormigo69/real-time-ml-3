@@ -39,9 +39,6 @@ def main(
         auto_offset_reset='latest' if data_source == 'live' else 'earliest',
     )
 
-    # # Limpiar el estado antes de comenzar
-    # app.clear_state()
-
     # Define the input and output topics of our streaming application
     input_topic = app.topic(
         name=kafka_input_topic,
@@ -73,6 +70,15 @@ def main(
     sdf = sdf.to_topic(output_topic)
 
     try:
+        # Limpiar el estado antes de comenzar
+        try:
+            app.clear_state()
+            logger.info("Estado previo limpiado correctamente")
+        except FileNotFoundError:
+            logger.info("No hay estado previo que limpiar")
+        except Exception as e:
+            logger.warning(f"Error al limpiar el estado: {e}")
+        
         app.run()
     except KeyboardInterrupt:
         logger.info('Deteniendo el servicio de manera controlada...')
