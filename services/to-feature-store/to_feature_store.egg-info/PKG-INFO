@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: to-feature-store
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: hopsworks>=4.1.3
+Requires-Dist: loguru>=0.7.2
+Requires-Dist: pandas<2.1.0
+Requires-Dist: pyarrow>=18.1.0
+Requires-Dist: pydantic-settings>=2.6.1
+Requires-Dist: quixstreams>=3.4.0
+
+## To-feature-store
+
+This service reads messages from a given Kafka topic, and pushes them to a feature store.
+
+We will use Hopsworks to store the features.
+https://c.app.hopsworks.ai/p/787604/view
+
