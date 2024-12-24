@@ -30,7 +30,7 @@ def main(
     sdf = app.dataframe(source=news_source)
 
     # Let's printing to check if this thing works
-    sdf.print(metadata=True)
+    # sdf.print(metadata=True)
 
     # Push the news to the output topic
     sdf = sdf.to_topic(output_topic)
