@@ -24,7 +24,7 @@ clean-redpanda-data:
 
 
 ########################################
-## Technical indicators pipeline 
+## Technical indicators pipeline
 ########################################
 
 # for live data
@@ -54,6 +54,10 @@ backfill-technical-indicators: build-technical-indicators-historical
 	docker compose -f technical-indicators-historical.yml down -v
 	# Luego iniciamos
 	RUN_ID=$(RUN_ID) docker compose -f technical-indicators-historical.yml up -d
+
+stop-technical-indicators-historical:
+	docker compose -f technical-indicators-historical.yml down
+
 
 # Technical indicators base pipeline management
 # build-technical-indicators-pipeline:

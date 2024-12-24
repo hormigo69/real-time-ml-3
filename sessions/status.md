@@ -77,3 +77,18 @@ Si los hooks no se ejecutan:
 1. Verificar que pre-commit está instalado: `pre-commit --version`
 2. Reinstalar los hooks: `pre-commit install`
 3. Limpiar la caché: `pre-commit clean`
+
+
+### uv para crear el directorio de virtualenv
+uv init nombre_del_entorno
+
+# para añadir librerías
+uv add nombre_de_la_librería
+uv add quixstreams pydantic-settings requests loguru
+
+
+### Añador el venv al interpreter path en cursor
+cmd+shift+p
+Python: Select Interpreter
+Enter interpreter path:
+   Ahí metemos el path de .venv/bin/python

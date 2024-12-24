@@ -177,6 +177,7 @@ anthropic.env
 trust_policy.json
 set_env_variables.sh
 ca.cert
+**/cryptopanic_credentials.env
 
 # Data files
 *.csv
@@ -194,5 +195,3 @@ model_cache/
 gradio_cached_examples
 certificates/
 target/
-
-
