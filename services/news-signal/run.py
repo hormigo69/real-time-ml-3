@@ -14,8 +14,9 @@ def main(
     logger.info("Hello from new-signal!")
 
     app = Application(
-        kafka_broker_address=kafka_broker_address,
-        kafka_input_topic=kafka_input_topic,
+        broker_address=kafka_broker_address,
+        consumer_group=kafka_consumer_group,
+        auto_offset_reset="earliest",
     )
 
     input_topic = app.topic(

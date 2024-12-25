@@ -195,3 +195,5 @@ model_cache/
 gradio_cached_examples
 certificates/
 target/
+.DS_Store
+services/.DS_Store
