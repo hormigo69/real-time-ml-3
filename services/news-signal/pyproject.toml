@@ -1,0 +1,15 @@
+[project]
+name = "new-signal"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "llama-index-core>=0.12.8",
+    "llama-index-llms-anthropic>=0.6.3",
+    "loguru>=0.7.3",
+    "numpy>=2.2.1",
+    "pandas>=1.5.3",
+    "pydantic-settings>=2.7.0",
+    "quixstreams>=0.5.7",
+]

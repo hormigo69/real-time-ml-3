@@ -9,7 +9,6 @@ source .venv/bin/activate
 #sincronizar con uv
 uv sync
 
-
 probar los servicios en local
 probar dockerizados
 
@@ -28,6 +27,12 @@ Corriendo en local todos los servicios.
 # Notas
 
 ## Configuración del Entorno de Desarrollo
+
+### Creación de directorio y carga de librerías
+
+uv init news
+uv add quixstreams pydantic-settings requests loguru
+
 
 ### Pre-commit y Ruff
 
