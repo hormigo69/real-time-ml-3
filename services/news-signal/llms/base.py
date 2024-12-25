@@ -57,3 +57,7 @@ class BaseNewsSignalExtractor(ABC):
         output_format: Literal["dict", "NewsSignal"] = "dict",
     ) -> dict | NewsSignal:
         pass
+
+    # @property
+    # def model_name(self) -> str:
+    #     return self.model_name

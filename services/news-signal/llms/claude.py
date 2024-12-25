@@ -39,6 +39,8 @@ class ClaudeNewsSignalExtractor(BaseNewsSignalExtractor):
             """
         )
 
+        self.model_name = model_name
+
     def get_signal(
         self,
         text: str,

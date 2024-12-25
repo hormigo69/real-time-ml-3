@@ -1,7 +1,8 @@
 from typing import Literal
 
-from .claude import ClaudeNewsSignalExtractor
 from .base import BaseNewsSignalExtractor
+from .claude import ClaudeNewsSignalExtractor
+from .ollama import OllamaNewsSignalExtractor
 
 
 def get_llm(
@@ -26,5 +27,15 @@ def get_llm(
             model_name=config.model_name,
             api_key=config.api_key,
         )
+
+    elif model_provider == "ollama":
+        from .config import OllamaConfig
+
+        config = OllamaConfig()
+
+        return OllamaNewsSignalExtractor(
+            model_name=config.model_name,
+        )
+
     else:
         raise ValueError(f"Unsupported model provider: {model_provider}")
