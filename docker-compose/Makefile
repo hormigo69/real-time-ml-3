@@ -58,17 +58,42 @@ backfill-technical-indicators: build-technical-indicators-historical
 stop-technical-indicators-historical:
 	docker compose -f technical-indicators-historical.yml down
 
+# News signal pipeline management
+build-news-signal-live:
+	docker compose -f news-signal-live.yml build
 
-# Technical indicators base pipeline management
-# build-technical-indicators-pipeline:
-# 	docker compose -f technical-indicators-pipeline.yml build
+start-news-signal-live: build-news-signal-live
+	docker compose -f news-signal-live.yml up -d
 
-# start-technical-indicators-pipeline: build-technical-indicators-pipeline
-# 	docker compose -f technical-indicators-pipeline.yml up -d
+stop-news-signal-live:
+	docker compose -f news-signal-live.yml down
 
-# stop-technical-indicators-pipeline:
-# 	docker compose -f technical-indicators-pipeline.yml down
+
 
 clean-backfill-kafka-topics:
 	@echo "Removing all Kafka topics that contain the word historical"
 	docker compose -f redpanda.yml exec redpanda rpk topic delete -r ".*historical.*"
+
+# Comandos de diagnóstico para news-signal
+logs-feature-store:
+	docker compose -f news-signal-live.yml logs -f to-feature-store
+
+check-news-signal-config:
+	@echo "Verificando configuración de news-signal..."
+	@cat ../services/to-feature-store/live.settings.news-signal.env
+	@echo "\nVerificando que el servicio está corriendo:"
+	@docker compose -f news-signal-live.yml ps to-feature-store
+
+check-news-signal-topic:
+	@echo "Verificando topic news_signal en Redpanda..."
+	docker compose -f redpanda.yml exec redpanda rpk topic list | grep news_signal
+
+logs-news:
+	docker compose -f news-signal-live.yml logs -f news
+
+logs-news-signal:
+	docker compose -f news-signal-live.yml logs -f news-signal
+
+watch-all-logs:
+	@echo "Monitoreando logs de todos los servicios..."
+	docker compose -f news-signal-live.yml logs -f

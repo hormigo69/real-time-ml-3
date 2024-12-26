@@ -1,5 +1,6 @@
 # Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
+#FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
+FROM python:3.10.12-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -20,7 +21,7 @@ RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
 
 # Install the project into `/app`
 WORKDIR /app
-
+RUN pip install uv
 # # Create state directory
 RUN mkdir -p /app/state && chmod 777 /app/state
 

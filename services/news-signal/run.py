@@ -35,6 +35,7 @@ def main(
     sdf = sdf.apply(
         lambda value: {
             "news": value["title"],
+            # "timestamp_ms": value["timestamp_ms"],  # added to fix the error 26/12 13:53
             **llm.get_signal(value["title"]),
             "model_name": llm.model_name,
         }
