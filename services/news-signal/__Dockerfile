@@ -1,0 +1,47 @@
+# Primera etapa - Builder
+FROM debian:bookworm-slim AS builder
+
+# Instalar Python y pip
+RUN apt-get update && \
+    apt-get install -y python3.10 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Instalar uv
+RUN pip3 install uv
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+COPY . .
+RUN uv sync --frozen --no-dev
+
+# Segunda etapa - Final
+FROM debian:bookworm-slim
+
+# Instalar Python
+RUN apt-get update && \
+    apt-get install -y python3.10 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar la aplicación desde el builder
+COPY --from=builder --chown=app:app /app /app
+
+# Crear usuario no-root
+RUN groupadd -r app && useradd -r -g app app
+
+# Instalar el proyecto y sus dependencias
+RUN pip3 install .
+
+# Colocar ejecutables en el path
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Cambiar a usuario no-root
+USER app
+
+# Ejecutar la aplicación FastAPI por defecto
+CMD ["python3", "/app/run.py"]
