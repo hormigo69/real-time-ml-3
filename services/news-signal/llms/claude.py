@@ -54,6 +54,9 @@ class ClaudeNewsSignalExtractor(BaseNewsSignalExtractor):
             news_story=text,
         )
 
+        # Keep only the cois that have a non-zero signal
+        # response.coins = [coin for coin in response.coins if coin.signal != 0]
+
         if output_format == "dict":
             return response.to_dict()
         else:

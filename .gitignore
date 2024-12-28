@@ -175,3 +175,7 @@ model_cache/
 gradio_cached_examples
 certificates/
 target/
+
+# temporal files
+temp/
+temp/*

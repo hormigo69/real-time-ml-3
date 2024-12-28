@@ -97,3 +97,5 @@ cmd+shift+p
 Python: Select Interpreter
 Enter interpreter path:
    Ahí metemos el path de .venv/bin/python
+
+------------------------------
