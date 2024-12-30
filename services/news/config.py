@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,9 +11,10 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file="settings.env")
     kafka_broker_address: str
     kafka_topic: str
+    data_source: Literal["live", "historical"]
     polling_interval_sec: Optional[int] = 10
 
-    historical_data_source_url: str
+    historical_data_source_url: Optional[str] = None
 
 
 config = Config()

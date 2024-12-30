@@ -1,6 +1,5 @@
 from loguru import logger
-from news_data_source import NewsDataSource
-from news_downloader import NewsDownloader
+from sources import NewsDataSource
 from quixstreams import Application
 
 
@@ -39,17 +38,19 @@ def main(
 
 
 if __name__ == "__main__":
-    from config import config, cryptopanic_config
+    from config import config
 
-    # Create News Downloader object
-    news_downloader = NewsDownloader(cryptopanic_api_key=cryptopanic_config.api_key)
+    # Create the news source either for
+    # -  Live data -> via Cryptopanic API
+    # -  Historical data -> via reading a CSV file we got from an external URL
+    from sources import get_source
 
-    # Quix Streams data source that wraps the news downloader
-    news_source = NewsDataSource(
-        news_downloader=news_downloader,
+    news_source = get_source(
+        config.data_source,
         polling_interval_sec=config.polling_interval_sec,
     )
 
+    # Run the streaming application
     main(
         kafka_broker_address=config.kafka_broker_address,
         kafka_topic=config.kafka_topic,
