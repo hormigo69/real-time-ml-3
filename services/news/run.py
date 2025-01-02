@@ -48,6 +48,8 @@ if __name__ == "__main__":
     news_source = get_source(
         config.data_source,
         polling_interval_sec=config.polling_interval_sec,
+        url_rar_file=config.historical_data_source_url_rar_file,
+        path_to_csv_file=config.historical_data_source_csv_file,
     )
 
     # Run the streaming application

@@ -2,6 +2,31 @@ from loguru import logger
 from quixstreams import Application
 from llms.base import BaseNewsSignalExtractor
 from datetime import datetime
+from typing import List
+
+
+def add_signal_to_news(value: dict) -> dict:
+    breakpoint()
+
+    news_signal: List[dict] = llm.get_signal(value["title"], output_format="list")
+    model_name = llm.model_name
+    # Calculate timestamp_ms from published_at
+    # This is because I don't receive timestamp_ms from the news data source for some reason
+    # TODO: Find the error and fix it
+    timestamp_ms = int(
+        datetime.fromisoformat(value["published_at"].replace("Z", "+00:00")).timestamp()
+        * 1000
+    )
+
+    return [
+        {
+            "coin": n["coin"],
+            "signal": n["signal"],
+            "model_name": model_name,
+            "timestamp_ms": timestamp_ms,
+        }
+        for n in news_signal
+    ]
 
 
 def main(
@@ -12,6 +37,13 @@ def main(
     llm: BaseNewsSignalExtractor,
 ):
     logger.info("Hello from new-signal!")
+
+    # create a unique id from current millisecond
+    # TODO: remove thisonce we are done debugging
+    import time
+
+    unique_id = str(int(time.time() * 1000))
+    kafka_consumer_group = f"{kafka_consumer_group}-{unique_id}"
 
     app = Application(
         broker_address=kafka_broker_address,
@@ -31,27 +63,29 @@ def main(
 
     sdf = app.dataframe(input_topic)
 
-    ##### Adding this part to calculate the timestamp_ms in the same way that the news data source does
-    # but it's not working as expected
+    sdf = sdf.apply(add_signal_to_news, expand=True)
 
-    # Process the incoming news into a news signal
-    def process_message(value):
-        logger.debug(f"Processing message: {value}")
-        timestamp_ms = int(
-            datetime.fromisoformat(
-                value["published_at"].replace("Z", "+00:00")
-            ).timestamp()
-            * 1000
-        )
-        return {
-            "news": value["title"],
-            "timestamp_ms": timestamp_ms,
-            **llm.get_signal(value["title"]),
-            "model_name": llm.model_name,
-        }
+    # ##### Adding this part to calculate the timestamp_ms in the same way that the news data source does
+    # # but it's not working as expected
 
-    # Process the incoming news into a news signal
-    sdf = sdf.apply(process_message)
+    # # Process the incoming news into a news signal
+    # def process_message(value):
+    #     logger.debug(f"Processing message: {value}")
+    #     timestamp_ms = int(
+    #         datetime.fromisoformat(
+    #             value["published_at"].replace("Z", "+00:00")
+    #         ).timestamp()
+    #         * 1000
+    #     )
+    #     return {
+    #         "news": value["title"],
+    #         "timestamp_ms": timestamp_ms,
+    #         **llm.get_signal(value["title"]),
+    #         "model_name": llm.model_name,
+    #     }
+
+    # # Process the incoming news into a news signal
+    # sdf = sdf.apply(process_message)
 
     #########################################################
 
@@ -69,6 +103,8 @@ def main(
     # )
 
     sdf = sdf.update(lambda value: logger.debug(f"Final message: {value}"))
+
+    # sdf = sdf.update(lambda value: breakpoint())
 
     sdf = sdf.to_topic(output_topic)
 

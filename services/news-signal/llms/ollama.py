@@ -63,8 +63,15 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
             news_story=text,
         )
 
-        if output_format == "dict":
-            return response.to_dict()
+        # keep only news signals with non-zero signal
+        response.news_signals = [
+            news_signal
+            for news_signal in response.news_signals
+            if news_signal.signal != 0
+        ]
+
+        if output_format == "list":
+            return response.model_dump()["news_signals"]
         else:
             return response
 
