@@ -1,4 +1,6 @@
-from typing import Literal, Optional
+import httpx
+from loguru import logger
+from typing import Literal, Optional, List, Union
 
 from llama_index.llms.ollama import Ollama
 from llama_index.core.prompts import PromptTemplate
@@ -15,6 +17,11 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
         self.llm = Ollama(
             model=model_name,
             temperature=temperature,
+            request_timeout=60.0,
+            additional_kwargs={
+                "num_retries": 3,
+                "retry_interval": 1.0,
+            },
         )
 
         self.prompt_template = PromptTemplate(
@@ -45,35 +52,70 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
     def get_signal(
         self,
         text: str,
-        output_format: Literal["dict", "NewsSignal"] = "NewsSignal",
-    ) -> dict | NewsSignal:
+        output_format: Literal["dict", "list", "NewsSignal"] = "NewsSignal",
+        max_retries: int = 3,
+    ) -> Union[dict, List[dict], NewsSignal]:
         """
         Get the news signal from the given "text"
 
         Args:
             text (str): The news article to analyze
-            output_format (Literal["dict", "NewsSignal"]): The format of the output
+            output_format (Literal["dict", "list", "NewsSignal"]): The format of the output
+            max_retries (int): Maximum number of retries on failure
 
         Returns:
-            dict | NewsSignal: The news signal
+            Union[dict, List[dict], NewsSignal]: The news signal
         """
-        response: NewsSignal = self.llm.structured_predict(
-            NewsSignal,
-            prompt=self.prompt_template,
-            news_story=text,
-        )
+        for attempt in range(max_retries):
+            try:
+                logger.debug(
+                    f"Intentando procesar texto (intento {attempt + 1}): {text[:100]}..."
+                )
 
-        # keep only news signals with non-zero signal
-        response.news_signals = [
-            news_signal
-            for news_signal in response.news_signals
-            if news_signal.signal != 0
-        ]
+                response: NewsSignal = self.llm.structured_predict(
+                    NewsSignal,
+                    prompt=self.prompt_template,
+                    news_story=text,
+                )
 
-        if output_format == "list":
-            return response.model_dump()["news_signals"]
-        else:
-            return response
+                # keep only news signals with non-zero signal
+                response.news_signals = [
+                    news_signal
+                    for news_signal in response.news_signals
+                    if news_signal.signal != 0
+                ]
+
+                if output_format == "list":
+                    return response.model_dump()["news_signals"]
+                else:
+                    return response
+
+            except (httpx.ReadTimeout, httpx.ConnectTimeout) as e:
+                logger.warning(
+                    f"Timeout en intento {attempt + 1} para: {text[:100]}... Error: {str(e)}"
+                )
+                if attempt == max_retries - 1:  # Si es el último intento
+                    logger.error(f"Agotados todos los intentos para: {text[:100]}")
+                    # Devolver un resultado vacío en lugar de fallar
+                    if output_format == "list":
+                        return []
+                    elif output_format == "dict":
+                        return {}
+                    else:
+                        return NewsSignal(news_signals=[])
+                continue
+
+            except Exception as e:
+                logger.error(
+                    f"Error inesperado al procesar: {text[:100]}... Error: {str(e)}"
+                )
+                # Devolver un resultado vacío en lugar de fallar
+                if output_format == "list":
+                    return []
+                elif output_format == "dict":
+                    return {}
+                else:
+                    return NewsSignal(news_signals=[])
 
 
 if __name__ == "__main__":

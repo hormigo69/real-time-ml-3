@@ -5,28 +5,38 @@ from datetime import datetime
 from typing import List
 
 
-def add_signal_to_news(value: dict) -> dict:
-    breakpoint()
+def add_signal_to_news(value: dict) -> List[dict]:
+    try:
+        news_signal: List[dict] = llm.get_signal(value["title"], output_format="list")
 
-    news_signal: List[dict] = llm.get_signal(value["title"], output_format="list")
-    model_name = llm.model_name
-    # Calculate timestamp_ms from published_at
-    # This is because I don't receive timestamp_ms from the news data source for some reason
-    # TODO: Find the error and fix it
-    timestamp_ms = int(
-        datetime.fromisoformat(value["published_at"].replace("Z", "+00:00")).timestamp()
-        * 1000
-    )
+        if not news_signal:  # Si la lista está vacía
+            logger.warning(
+                f"No se pudo obtener señal para la noticia: {value['title'][:100]}..."
+            )
+            return []  # Devolver lista vacía en lugar de fallar
 
-    return [
-        {
-            "coin": n["coin"],
-            "signal": n["signal"],
-            "model_name": model_name,
-            "timestamp_ms": timestamp_ms,
-        }
-        for n in news_signal
-    ]
+        model_name = llm.model_name
+        timestamp_ms = int(
+            datetime.fromisoformat(
+                value["published_at"].replace("Z", "+00:00")
+            ).timestamp()
+            * 1000
+        )
+
+        return [
+            {
+                "coin": n["coin"],
+                "signal": n["signal"],
+                "model_name": model_name,
+                "timestamp_ms": timestamp_ms,
+            }
+            for n in news_signal
+        ]
+    except Exception as e:
+        logger.error(
+            f"Error procesando noticia: {value['title'][:100]}... Error: {str(e)}"
+        )
+        return []  # Devolver lista vacía en caso de error
 
 
 def main(
