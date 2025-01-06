@@ -12,12 +12,17 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
     def __init__(
         self,
         model_name: str,
+        base_url: str,  # añadido al meter ollama_base_url en el config en lugar de hardcoded
         temperature: Optional[float] = 0,
     ):
+        # base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        logger.info(f"Inicializando Ollama con URL base: {base_url}")
+
         self.llm = Ollama(
             model=model_name,
             temperature=temperature,
             request_timeout=60.0,
+            base_url=base_url,
             additional_kwargs={
                 "num_retries": 3,
                 "retry_interval": 1.0,
@@ -72,11 +77,17 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
                     f"Intentando procesar texto (intento {attempt + 1}): {text[:100]}..."
                 )
 
+                # logger.info(f"Configuración LLM - Modelo: {self.model_name}, URL base: {self.llm.base_url}")
+
+                # logger.debug("Iniciando llamada a Ollama API...")
+
                 response: NewsSignal = self.llm.structured_predict(
                     NewsSignal,
                     prompt=self.prompt_template,
                     news_story=text,
                 )
+
+                # logger.debug("Respuesta recibida exitosamente de Ollama API")
 
                 # keep only news signals with non-zero signal
                 response.news_signals = [
@@ -91,8 +102,11 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
                     return response
 
             except (httpx.ReadTimeout, httpx.ConnectTimeout) as e:
-                logger.warning(
-                    f"Timeout en intento {attempt + 1} para: {text[:100]}... Error: {str(e)}"
+                logger.error(
+                    f"Error de timeout - Detalles de conexión:\n"
+                    f"URL: {self.llm.base_url}\n"
+                    f"Timeout configurado: {self.llm.request_timeout}s\n"
+                    f"Error completo: {str(e)}"
                 )
                 if attempt == max_retries - 1:  # Si es el último intento
                     logger.error(f"Agotados todos los intentos para: {text[:100]}")
@@ -107,7 +121,12 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
 
             except Exception as e:
                 logger.error(
-                    f"Error inesperado al procesar: {text[:100]}... Error: {str(e)}"
+                    f"Error inesperado al procesar texto. Detalles:\n"
+                    f"URL: {self.llm.base_url}\n"
+                    f"Modelo: {self.model_name}\n"
+                    f"Texto: {text[:100]}...\n"
+                    f"Tipo de error: {type(e).__name__}\n"
+                    f"Error completo: {str(e)}"
                 )
                 # Devolver un resultado vacío en lugar de fallar
                 if output_format == "list":

@@ -35,6 +35,7 @@ def get_llm(
 
         return OllamaNewsSignalExtractor(
             model_name=config.model_name,
+            base_url=config.ollama_base_url,
         )
 
     else:

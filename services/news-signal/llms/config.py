@@ -14,3 +14,4 @@ class OllamaConfig(BaseSettings):
         env_file="ollama.env",
     )
     model_name: str
+    ollama_base_url: str

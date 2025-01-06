@@ -61,7 +61,7 @@ class HopsworksFeatureStoreSink(BatchingSink):
         data = [item.value for item in batch]
         data = pd.DataFrame(data)
 
-        breakpoint()
+        # breakpoint()
 
         try:
             # Try to write data to the db
@@ -70,7 +70,7 @@ class HopsworksFeatureStoreSink(BatchingSink):
             # In case of timeout, tell the app to wait for 30s
             # and retry the writing later
 
-            breakpoint()
+            # breakpoint()
 
             raise SinkBackpressureError(
                 retry_after=30.0,
