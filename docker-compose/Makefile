@@ -46,7 +46,6 @@ build-technical-indicators-historical:
 	@echo "Building technical indicators pipeline for historical data"
 	docker compose -f technical-indicators-historical.yml build
 
-
 backfill-technical-indicators: build-technical-indicators-historical
 	$(eval RUN_ID := $(shell uuidgen))
 	@echo "Starting backfill with RUN_ID: $(RUN_ID)"
@@ -58,7 +57,11 @@ backfill-technical-indicators: build-technical-indicators-historical
 stop-technical-indicators-historical:
 	docker compose -f technical-indicators-historical.yml down
 
-# News signal pipeline management
+
+########################################
+## News signal pipeline management
+########################################
+
 # for live data
 build-news-signal-live:
 	docker compose -f news-signal-live.yml build
@@ -111,3 +114,39 @@ logs-news-signal:
 watch-all-logs:
 	@echo "Monitoreando logs de todos los servicios..."
 	docker compose -f news-signal-live.yml logs -f
+
+
+# Parar ordenadamente los servicios con una pausa de 10 segundos entre medias
+stop-all:
+	@echo "Deteniendo news-signal-live..."
+	docker compose -f news-signal-live.yml down --timeout 10
+	sleep 10
+	@echo "Deteniendo technical-indicators-live..."
+	docker compose -f technical-indicators-live.yml down --timeout 10
+	sleep 10
+	@echo "Deteniendo news-signal-historical..."
+	docker compose -f news-signal-historical.yml down --timeout 10
+	sleep 10
+	@echo "Deteniendo technical-indicators-historical..."
+	docker compose -f technical-indicators-historical.yml down --timeout 10
+	sleep 10
+
+	@echo "Deteniendo redpanda..."
+	docker compose -f redpanda.yml down --timeout 10
+	@echo "Todos los servicios han sido detenidos"
+
+start-all:
+	@echo "Iniciando todos los servicios..."
+	@echo "1. Iniciando Redpanda..."
+	$(MAKE) start-redpanda
+	@echo "2. Esperando 10 segundos para que Redpanda se inicialice..."
+	sleep 10
+	@echo "3. Iniciando pipeline de indicadores técnicos (live)..."
+	$(MAKE) start-technical-indicators-live
+	@echo "4. Iniciando backfill de indicadores técnicos..."
+	$(MAKE) backfill-technical-indicators
+	@echo "5. Iniciando pipeline de señales de noticias (live)..."
+	$(MAKE) start-news-signal-live
+	@echo "6. Iniciando backfill de señales de noticias..."
+	$(MAKE) backfill-news-signals
+	@echo "¡Todos los servicios han sido iniciados!"

@@ -12,7 +12,7 @@ services:
     networks:
       - redpanda_network
     env_file:
-      - ../services/news/settings.env
+      - ../services/news/live.settings.env # lo tenía como ../services/news/settings.env
     environment:
       - KAFKA_BROKER_ADDRESS=redpanda:9092
     #restart: always
@@ -26,8 +26,8 @@ services:
     networks:
       - redpanda_network
     env_file:
-      - ../services/news-signal/settings.env
-      - ../services/news-signal/anthropic_credentials.env
+      - ../services/news-signal/live.settings.env
+      #- ../services/news-signal/anthropic_credentials.env
     environment:
       - KAFKA_BROKER_ADDRESS=redpanda:9092
       - MODEL_PROVIDER=anthropic
