@@ -6,6 +6,49 @@ from typing import List
 
 
 def add_signal_to_news(value: dict) -> List[dict]:
+    """
+    From the given news in value['title'] extract the news signal using the LLM.
+    """
+    logger.debug(f'Extracting news signal from {value["title"]}')
+
+    try:
+        news_signal = llm.get_signal(value["title"], output_format="list")
+        model_name = llm.model_name
+        timestamp_ms = value["timestamp_ms"]
+
+        # Si news_signal es un objeto NewsSignal, obtener la lista de señales
+        if hasattr(news_signal, "news_signals"):
+            news_signal = news_signal.news_signals
+
+        # Asegurarse de que news_signal sea una lista
+        if not isinstance(news_signal, list):
+            news_signal = [news_signal]
+
+        output = []
+        for n in news_signal:
+            # Si n es un objeto NewsSignalOneCoin, convertirlo a dict
+            if hasattr(n, "coin") and hasattr(n, "signal"):
+                n = {"coin": n.coin, "signal": n.signal}
+
+            if isinstance(n, dict) and "coin" in n and "signal" in n:
+                output.append(
+                    {
+                        "coin": n["coin"],
+                        "signal": n["signal"],
+                        "model_name": model_name,
+                        "timestamp_ms": timestamp_ms,
+                    }
+                )
+
+        return output
+
+    except Exception as e:
+        logger.error(f'Error procesando noticia: {value["title"][:100]}...')
+        logger.error(f"Error: {str(e)}")
+        return []
+
+
+def old_add_signal_to_news(value: dict) -> List[dict]:
     try:
         news_signal: List[dict] = llm.get_signal(value["title"], output_format="list")
 

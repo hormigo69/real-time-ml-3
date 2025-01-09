@@ -13,7 +13,7 @@ def main(
     kafka_consumer_group: str,
     max_candles_in_state: int,
     candle_seconds: int,
-    data_source: Literal['live', 'historical', 'test'],
+    data_source: Literal["live", "historical", "test"],
 ):
     """
     steps:
@@ -31,22 +31,22 @@ def main(
     Returns:
         None
     """
-    logger.info('Hello from technical-indicators!')
+    logger.info("Hello from technical-indicators!")
 
     app = Application(
         broker_address=kafka_broker_address,
         consumer_group=kafka_consumer_group,
-        auto_offset_reset='latest' if data_source == 'live' else 'earliest',
+        auto_offset_reset="latest" if data_source == "live" else "earliest",
     )
 
     # Define the input and output topics of our streaming application
     input_topic = app.topic(
         name=kafka_input_topic,
-        value_deserializer='json',
+        value_deserializer="json",
     )
     output_topic = app.topic(
         name=kafka_output_topic,
-        value_serializer='json',
+        value_serializer="json",
     )
 
     # Create a Streaming DataFrame so we can start transforming data in real time
@@ -54,7 +54,7 @@ def main(
 
     # We only keep the candles with the same window size as the candle_seconds
     # Thanks Carlo!
-    sdf = sdf[sdf['candle_seconds'] == candle_seconds]
+    sdf = sdf[sdf["candle_seconds"] == candle_seconds]
 
     # Update the list of candles in the state
     # Apply a custom function and inform StreamingDataFrame
@@ -64,7 +64,8 @@ def main(
     # Compute the technical indicators from the list of candles in the state
     sdf = sdf.apply(compute_indicators, stateful=True)
 
-    sdf = sdf.update(lambda value: logger.debug(f'Final message: {value}'))
+    # Add a 'coin' field to the final message
+    sdf = sdf.apply(lambda value: {**value, "coin": value["pair"].split("/")[0]})
 
     # Send the final message to the output topic
     sdf = sdf.to_topic(output_topic)
@@ -78,17 +79,17 @@ def main(
             logger.info("No hay estado previo que limpiar")
         except Exception as e:
             logger.warning(f"Error al limpiar el estado: {e}")
-        
+
         app.run()
     except KeyboardInterrupt:
-        logger.info('Deteniendo el servicio de manera controlada...')
+        logger.info("Deteniendo el servicio de manera controlada...")
         app.stop()
     except Exception as e:
-        logger.error(f'Error inesperado: {e}')
+        logger.error(f"Error inesperado: {e}")
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from config import config
 
     main(
